@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>CDSS — Clinical Decision Support System</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav class="navbar">
+    <div class="nav-brand">
+      <span class="nav-cross">✚</span> CDSS
+    </div>
+    <ul class="nav-links">
+      <li><a href="index.html" class="active">Home</a></li>
+      <li><a href="heart.html">Heart</a></li>
+      <li><a href="diabetes.html">Diabetes</a></li>
+      <li><a href="dashboard.html">Dashboard</a></li>
+    </ul>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-bg-grid"></div>
+    <div class="hero-content animate-up">
+      <div class="hero-badge">AI-Powered Medical Analysis</div>
+      <h1 class="hero-title">Clinical Decision<br><span class="hero-accent">Support System</span></h1>
+      <p class="hero-subtitle">Advanced risk assessment for Heart Disease and Diabetes using machine learning — helping clinicians make faster, smarter decisions.</p>
+      <div class="hero-actions">
+        <a href="heart.html" class="btn btn-primary">
+          <span>❤️</span> Heart Assessment
+        </a>
+        <a href="diabetes.html" class="btn btn-secondary">
+          <span>🩸</span> Diabetes Assessment
+        </a>
+      </div>
+    </div>
+    <div class="hero-visual animate-up delay-2">
+      <div class="pulse-ring"></div>
+      <div class="hero-card">
+        <div class="hc-label">Risk Level</div>
+        <div class="hc-value high">HIGH</div>
+        <div class="hc-bar"><div class="hc-fill" style="width:82%"></div></div>
+        <div class="hc-prob">Probability: 0.82</div>
+        <div class="hc-rec">⚠ Immediate consultation required</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FEATURES -->
+  <section class="features">
+    <div class="section-header">
+      <h2>What We Offer</h2>
+      <p>Comprehensive clinical decision support in one platform</p>
+    </div>
+    <div class="features-grid">
+      <div class="feature-card animate-up">
+        <div class="fc-icon">❤️</div>
+        <h3>Heart Disease Risk</h3>
+        <p>Predict heart disease risk using 13 clinical parameters including ECG data, cholesterol, and blood pressure.</p>
+        <a href="heart.html" class="fc-link">Start Assessment →</a>
+      </div>
+      <div class="feature-card animate-up delay-1">
+        <div class="fc-icon">🩸</div>
+        <h3>Diabetes Risk</h3>
+        <p>Assess diabetes probability using glucose levels, BMI, insulin, and hereditary factors with high accuracy.</p>
+        <a href="diabetes.html" class="fc-link">Start Assessment →</a>
+      </div>
+      <div class="feature-card animate-up delay-2">
+        <div class="fc-icon">📊</div>
+        <h3>History Dashboard</h3>
+        <p>Track all previous assessments, view trends, and download detailed PDF reports for patient records.</p>
+        <a href="dashboard.html" class="fc-link">View Dashboard →</a>
+      </div>
+      <div class="feature-card animate-up delay-3">
+        <div class="fc-icon">🥗</div>
+        <h3>Personalised Advice</h3>
+        <p>Get tailored diet plans and exercise recommendations based on your risk level and disease type.</p>
+        <a href="heart.html" class="fc-link">Get Advice →</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- STATS -->
+  <section class="stats-section">
+    <div class="stat-item">
+      <div class="stat-num">83.6%</div>
+      <div class="stat-label">Heart Model Accuracy</div>
+    </div>
+    <div class="stat-divider"></div>
+    <div class="stat-item">
+      <div class="stat-num">75.3%</div>
+      <div class="stat-label">Diabetes Model Accuracy</div>
+    </div>
+    <div class="stat-divider"></div>
+    <div class="stat-item">
+      <div class="stat-num">0.91</div>
+      <div class="stat-label">Heart ROC-AUC Score</div>
+    </div>
+    <div class="stat-divider"></div>
+    <div class="stat-item">
+      <div class="stat-num">3</div>
+      <div class="stat-label">Risk Levels Classified</div>
+    </div>
+  </section>
+
+  <!-- RISK LEGEND -->
+  <section class="risk-legend-section">
+    <div class="section-header">
+      <h2>Risk Classification</h2>
+      <p>Understanding your results</p>
+    </div>
+    <div class="risk-cards">
+      <div class="risk-card low">
+        <div class="risk-icon">🟢</div>
+        <h3>Low Risk</h3>
+        <div class="risk-prob">Probability: 0.0 – 0.3</div>
+        <p>Healthy indicators. Maintain your current lifestyle with regular checkups.</p>
+      </div>
+      <div class="risk-card medium">
+        <div class="risk-icon">🟡</div>
+        <h3>Medium Risk</h3>
+        <div class="risk-prob">Probability: 0.3 – 0.7</div>
+        <p>Some risk factors present. Consult your doctor and adopt preventive measures.</p>
+      </div>
+      <div class="risk-card high">
+        <div class="risk-icon">🔴</div>
+        <h3>High Risk</h3>
+        <div class="risk-prob">Probability: 0.7 – 1.0</div>
+        <p>Significant risk detected. Immediate medical consultation is strongly recommended.</p>
+      </div>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div class="footer-brand"><span class="nav-cross">✚</span> CDSS</div>
+    <p>Clinical Decision Support System — For informational purposes only. Always consult a qualified physician.</p>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>

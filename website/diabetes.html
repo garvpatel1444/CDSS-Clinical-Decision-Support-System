@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Diabetes Assessment — CDSS</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+
+  <nav class="navbar">
+    <div class="nav-brand"><span class="nav-cross">✚</span> CDSS</div>
+    <ul class="nav-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="heart.html">Heart</a></li>
+      <li><a href="diabetes.html" class="active">Diabetes</a></li>
+      <li><a href="dashboard.html">Dashboard</a></li>
+    </ul>
+  </nav>
+
+  <div class="page-header">
+    <div class="page-header-icon">🩸</div>
+    <h1>Diabetes Risk Assessment</h1>
+    <p>Enter the patient's clinical parameters below for AI-powered risk evaluation</p>
+  </div>
+
+  <div class="prediction-layout">
+
+    <!-- FORM -->
+    <div class="form-card animate-up">
+      <h2 class="form-title">Patient Parameters</h2>
+
+      <div class="form-grid">
+
+        <div class="form-group">
+          <label>Pregnancies <span class="unit">(count)</span></label>
+          <input type="number" id="pregnancies" placeholder="e.g. 2" min="0"/>
+        </div>
+
+        <div class="form-group">
+          <label>Glucose <span class="unit">(mg/dl)</span></label>
+          <input type="number" id="glucose" placeholder="e.g. 120"/>
+        </div>
+
+        <div class="form-group">
+          <label>Blood Pressure <span class="unit">(mm Hg)</span></label>
+          <input type="number" id="blood_pressure" placeholder="e.g. 75"/>
+        </div>
+
+        <div class="form-group">
+          <label>Skin Thickness <span class="unit">(mm)</span></label>
+          <input type="number" id="skin_thickness" placeholder="e.g. 25"/>
+        </div>
+
+        <div class="form-group">
+          <label>Insulin <span class="unit">(μU/ml)</span></label>
+          <input type="number" id="insulin" placeholder="e.g. 80"/>
+        </div>
+
+        <div class="form-group">
+          <label>BMI <span class="unit">(kg/m²)</span></label>
+          <input type="number" id="bmi" placeholder="e.g. 28.5" step="0.1"/>
+        </div>
+
+        <div class="form-group">
+          <label>Diabetes Pedigree Function <span class="info-tip" title="Hereditary diabetes score based on family history">ℹ</span></label>
+          <input type="number" id="diabetes_pedigree_function" placeholder="e.g. 0.5" step="0.001"/>
+        </div>
+
+        <div class="form-group">
+          <label>Age <span class="unit">(years)</span></label>
+          <input type="number" id="age" placeholder="e.g. 35" min="1" max="120"/>
+        </div>
+
+      </div>
+
+      <div class="form-actions">
+        <button class="btn btn-primary diabetes-btn" onclick="predictDiabetes()">
+          <span>🔍</span> Analyse Risk
+        </button>
+        <button class="btn btn-outline" onclick="clearForm('diabetes')">Clear</button>
+      </div>
+
+      <div id="diabetes-error" class="error-msg" style="display:none"></div>
+    </div>
+
+    <!-- RESULT -->
+    <div class="result-panel" id="diabetes-result" style="display:none">
+
+      <div class="result-header">
+        <h2>Assessment Result</h2>
+        <div class="result-badge" id="diabetes-risk-badge">—</div>
+      </div>
+
+      <div class="result-gauge-wrap">
+        <canvas id="diabetes-gauge" width="220" height="120"></canvas>
+        <div class="gauge-prob" id="diabetes-prob-text">—</div>
+        <div class="gauge-label">Diabetes Probability</div>
+      </div>
+
+      <div class="result-details">
+        <div class="rd-item">
+          <span class="rd-label">Risk Level</span>
+          <span class="rd-value" id="diabetes-risk-level">—</span>
+        </div>
+        <div class="rd-item">
+          <span class="rd-label">Prediction</span>
+          <span class="rd-value" id="diabetes-prediction">—</span>
+        </div>
+        <div class="rd-item">
+          <span class="rd-label">Recommendation</span>
+          <span class="rd-value" id="diabetes-recommendation">—</span>
+        </div>
+      </div>
+
+      <!-- DIET & EXERCISE -->
+      <div class="advice-section" id="diabetes-advice"></div>
+
+      <button class="btn btn-outline mt-1" onclick="downloadReport('diabetes')">
+        📄 Download Report
+      </button>
+
+    </div>
+
+  </div>
+
+  <!-- LOADING -->
+  <div class="loading-overlay" id="loading" style="display:none">
+    <div class="spinner"></div>
+    <p>Analysing...</p>
+  </div>
+
+  <footer class="footer">
+    <div class="footer-brand"><span class="nav-cross">✚</span> CDSS</div>
+    <p>For informational purposes only. Always consult a qualified physician.</p>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>

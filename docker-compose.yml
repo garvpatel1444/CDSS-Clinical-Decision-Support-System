@@ -29,6 +29,7 @@ services:
 
     volumes:
       - ./mlruns:/mlruns
+      
 
     command: >
       sh -c "
@@ -57,3 +58,9 @@ services:
     container_name: cdss_grafana
     ports:
       - "3000:3000"
+    volumes:
+      - grafana_data:/var/lib/grafana
+    restart: always
+
+volumes:
+      grafana_data:

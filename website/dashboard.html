@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Dashboard — CDSS</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+
+  <nav class="navbar">
+    <div class="nav-brand"><span class="nav-cross">✚</span> CDSS</div>
+    <ul class="nav-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="heart.html">Heart</a></li>
+      <li><a href="diabetes.html">Diabetes</a></li>
+      <li><a href="dashboard.html" class="active">Dashboard</a></li>
+    </ul>
+  </nav>
+
+  <div class="page-header">
+    <div class="page-header-icon">📊</div>
+    <h1>Prediction Dashboard</h1>
+    <p>History of all assessments — view, filter and download reports</p>
+  </div>
+
+  <div class="dashboard-container">
+
+    <!-- SUMMARY CARDS -->
+    <div class="summary-cards">
+      <div class="summary-card">
+        <div class="sc-icon">📋</div>
+        <div class="sc-info">
+          <div class="sc-num" id="total-count">0</div>
+          <div class="sc-label">Total Assessments</div>
+        </div>
+      </div>
+      <div class="summary-card heart-card">
+        <div class="sc-icon">❤️</div>
+        <div class="sc-info">
+          <div class="sc-num" id="heart-count">0</div>
+          <div class="sc-label">Heart Assessments</div>
+        </div>
+      </div>
+      <div class="summary-card diabetes-card">
+        <div class="sc-icon">🩸</div>
+        <div class="sc-info">
+          <div class="sc-num" id="diabetes-count">0</div>
+          <div class="sc-label">Diabetes Assessments</div>
+        </div>
+      </div>
+      <div class="summary-card high-card">
+        <div class="sc-icon">⚠️</div>
+        <div class="sc-info">
+          <div class="sc-num" id="high-count">0</div>
+          <div class="sc-label">High Risk Cases</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- FILTERS & ACTIONS -->
+    <div class="dash-toolbar">
+      <div class="dash-filters">
+        <select id="filter-type" onchange="renderHistory()">
+          <option value="all">All Types</option>
+          <option value="heart">Heart Only</option>
+          <option value="diabetes">Diabetes Only</option>
+        </select>
+        <select id="filter-risk" onchange="renderHistory()">
+          <option value="all">All Risk Levels</option>
+          <option value="Low Risk">Low Risk</option>
+          <option value="Medium Risk">Medium Risk</option>
+          <option value="High Risk">High Risk</option>
+        </select>
+      </div>
+      <div class="dash-actions">
+        <button class="btn btn-outline" onclick="downloadAllCSV()">⬇ Download CSV</button>
+        <button class="btn btn-danger" onclick="clearHistory()">🗑 Clear History</button>
+      </div>
+    </div>
+
+    <!-- HISTORY TABLE -->
+    <div class="history-table-wrap">
+      <table class="history-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Type</th>
+            <th>Date & Time</th>
+            <th>Risk Level</th>
+            <th>Probability</th>
+            <th>Recommendation</th>
+            <th>Report</th>
+          </tr>
+        </thead>
+        <tbody id="history-tbody">
+          <tr>
+            <td colspan="7" class="empty-state">
+              <div class="empty-icon">📭</div>
+              <p>No assessments yet. <a href="heart.html">Start here</a></p>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+
+  <footer class="footer">
+    <div class="footer-brand"><span class="nav-cross">✚</span> CDSS</div>
+    <p>For informational purposes only. Always consult a qualified physician.</p>
+  </footer>
+
+  <script src="app.js"></script>
+  <script>
+    // Load dashboard on page load
+    window.addEventListener('DOMContentLoaded', () => {
+      updateSummary();
+      renderHistory();
+    });
+  </script>
+</body>
+</html>

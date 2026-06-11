@@ -2,6 +2,7 @@ import pandas as pd
 import mlflow
 import mlflow.sklearn
 
+
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score, roc_auc_score, classification_report
@@ -10,7 +11,7 @@ from sklearn.metrics import accuracy_score, roc_auc_score, classification_report
 # Load dataset
 # -----------------------------
 
-df = pd.read_csv("heart.csv")
+df = pd.read_csv("app/heart.csv")
 
 # Strip BOM / whitespace from column names (common CSV issue)
 df.columns = df.columns.str.strip().str.lstrip("\ufeff")

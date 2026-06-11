@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Heart Disease Assessment — CDSS</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+
+  <nav class="navbar">
+    <div class="nav-brand"><span class="nav-cross">✚</span> CDSS</div>
+    <ul class="nav-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="heart.html" class="active">Heart</a></li>
+      <li><a href="diabetes.html">Diabetes</a></li>
+      <li><a href="dashboard.html">Dashboard</a></li>
+    </ul>
+  </nav>
+
+  <div class="page-header">
+    <div class="page-header-icon">❤️</div>
+    <h1>Heart Disease Risk Assessment</h1>
+    <p>Enter the patient's clinical parameters below for AI-powered risk evaluation</p>
+  </div>
+
+  <div class="prediction-layout">
+
+    <!-- FORM -->
+    <div class="form-card animate-up">
+      <h2 class="form-title">Patient Parameters</h2>
+
+      <div class="form-grid">
+
+        <div class="form-group">
+          <label>Age <span class="unit">(years)</span></label>
+          <input type="number" id="age" placeholder="e.g. 55" min="1" max="120"/>
+        </div>
+
+        <div class="form-group">
+          <label>Sex</label>
+          <select id="sex">
+            <option value="">Select</option>
+            <option value="1">Male</option>
+            <option value="0">Female</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Chest Pain Type <span class="info-tip" title="0=Typical Angina, 1=Atypical Angina, 2=Non-anginal, 3=Asymptomatic">ℹ</span></label>
+          <select id="cp">
+            <option value="">Select</option>
+            <option value="0">0 — Typical Angina</option>
+            <option value="1">1 — Atypical Angina</option>
+            <option value="2">2 — Non-anginal Pain</option>
+            <option value="3">3 — Asymptomatic</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Resting Blood Pressure <span class="unit">(mm Hg)</span></label>
+          <input type="number" id="trestbps" placeholder="e.g. 130"/>
+        </div>
+
+        <div class="form-group">
+          <label>Cholesterol <span class="unit">(mg/dl)</span></label>
+          <input type="number" id="chol" placeholder="e.g. 240"/>
+        </div>
+
+        <div class="form-group">
+          <label>Fasting Blood Sugar &gt; 120 mg/dl</label>
+          <select id="fbs">
+            <option value="">Select</option>
+            <option value="1">Yes</option>
+            <option value="0">No</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Resting ECG <span class="info-tip" title="0=Normal, 1=ST-T Abnormality, 2=LV Hypertrophy">ℹ</span></label>
+          <select id="restecg">
+            <option value="">Select</option>
+            <option value="0">0 — Normal</option>
+            <option value="1">1 — ST-T Abnormality</option>
+            <option value="2">2 — LV Hypertrophy</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Max Heart Rate Achieved <span class="unit">(bpm)</span></label>
+          <input type="number" id="thalach" placeholder="e.g. 150"/>
+        </div>
+
+        <div class="form-group">
+          <label>Exercise Induced Angina</label>
+          <select id="exang">
+            <option value="">Select</option>
+            <option value="1">Yes</option>
+            <option value="0">No</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>ST Depression (Oldpeak)</label>
+          <input type="number" id="oldpeak" placeholder="e.g. 1.5" step="0.1"/>
+        </div>
+
+        <div class="form-group">
+          <label>Slope of ST Segment <span class="info-tip" title="0=Upsloping, 1=Flat, 2=Downsloping">ℹ</span></label>
+          <select id="slope">
+            <option value="">Select</option>
+            <option value="0">0 — Upsloping</option>
+            <option value="1">1 — Flat</option>
+            <option value="2">2 — Downsloping</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Major Vessels (ca) <span class="info-tip" title="Number of major vessels colored by fluoroscopy (0–3)">ℹ</span></label>
+          <select id="ca">
+            <option value="">Select</option>
+            <option value="0">0</option>
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+          </select>
+        </div>
+
+        <div class="form-group full-width">
+          <label>Thalassemia <span class="info-tip" title="1=Normal, 2=Fixed Defect, 3=Reversible Defect">ℹ</span></label>
+          <select id="thal">
+            <option value="">Select</option>
+            <option value="1">1 — Normal</option>
+            <option value="2">2 — Fixed Defect</option>
+            <option value="3">3 — Reversible Defect</option>
+          </select>
+        </div>
+
+      </div>
+
+      <div class="form-actions">
+        <button class="btn btn-primary" onclick="predictHeart()">
+          <span>🔍</span> Analyse Risk
+        </button>
+        <button class="btn btn-outline" onclick="clearForm('heart')">Clear</button>
+      </div>
+
+      <div id="heart-error" class="error-msg" style="display:none"></div>
+    </div>
+
+    <!-- RESULT -->
+    <div class="result-panel" id="heart-result" style="display:none">
+
+      <div class="result-header">
+        <h2>Assessment Result</h2>
+        <div class="result-badge" id="heart-risk-badge">—</div>
+      </div>
+
+      <div class="result-gauge-wrap">
+        <canvas id="heart-gauge" width="220" height="120"></canvas>
+        <div class="gauge-prob" id="heart-prob-text">—</div>
+        <div class="gauge-label">Disease Probability</div>
+      </div>
+
+      <div class="result-details">
+        <div class="rd-item">
+          <span class="rd-label">Risk Level</span>
+          <span class="rd-value" id="heart-risk-level">—</span>
+        </div>
+        <div class="rd-item">
+          <span class="rd-label">Prediction</span>
+          <span class="rd-value" id="heart-prediction">—</span>
+        </div>
+        <div class="rd-item">
+          <span class="rd-label">Recommendation</span>
+          <span class="rd-value" id="heart-recommendation">—</span>
+        </div>
+      </div>
+
+      <!-- DIET & EXERCISE -->
+      <div class="advice-section" id="heart-advice"></div>
+
+      <button class="btn btn-outline mt-1" onclick="downloadReport('heart')">
+        📄 Download Report
+      </button>
+
+    </div>
+
+  </div>
+
+  <!-- LOADING -->
+  <div class="loading-overlay" id="loading" style="display:none">
+    <div class="spinner"></div>
+    <p>Analysing...</p>
+  </div>
+
+  <footer class="footer">
+    <div class="footer-brand"><span class="nav-cross">✚</span> CDSS</div>
+    <p>For informational purposes only. Always consult a qualified physician.</p>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>

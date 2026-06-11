@@ -10,7 +10,7 @@ from sklearn.metrics import accuracy_score, roc_auc_score, classification_report
 # Load dataset
 # -----------------------------
 
-df = pd.read_csv("diabetes.csv")
+df = pd.read_csv("app/diabetes.csv")
 
 # Outcome: 1 = diabetic, 0 = non-diabetic
 X = df.drop("Outcome", axis=1)

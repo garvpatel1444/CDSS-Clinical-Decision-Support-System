@@ -8,6 +8,7 @@ import logging
 import pandas as pd
 
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
 import mlflow
@@ -48,6 +49,14 @@ app = FastAPI(
     version="1.0"
 )
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 mlflow.set_tracking_uri(MLFLOW_TRACKING_URI)
 
 # -----------------------------
@@ -56,11 +65,6 @@ mlflow.set_tracking_uri(MLFLOW_TRACKING_URI)
 
 heart_model = None
 diabetes_model = None
-
-# We keep references to the underlying sklearn models
-# so we can call predict_proba() directly and correctly.
-# mlflow.pyfunc wraps the model and does NOT expose predict_proba,
-# which caused the probability inversion bug in the original code.
 
 heart_sklearn_model = None
 diabetes_sklearn_model = None
@@ -111,16 +115,14 @@ def load_models():
             model_uri=f"models:/{HEART_MODEL_NAME}@production"
         )
 
-        # Extract the underlying sklearn model for predict_proba access.
-        # mlflow.pyfunc wraps the sklearn model inside .unwrap_python_model()
-        # or accessible via ._model_impl.sklearn_model depending on flavour.
         try:
             heart_sklearn_model = heart_model.unwrap_python_model()
         except Exception:
-            # Fallback: access the sklearn model stored in the pyfunc wrapper
             heart_sklearn_model = heart_model._model_impl.sklearn_model
 
-        logger.info("Heart model loaded (sklearn model extracted for predict_proba)")
+        logger.info(f"Heart sklearn model type: {type(heart_sklearn_model)}")
+        logger.info(f"Heart classes_: {heart_sklearn_model.classes_}")
+        logger.info("Heart model loaded successfully")
 
     except Exception as e:
 
@@ -140,7 +142,9 @@ def load_models():
         except Exception:
             diabetes_sklearn_model = diabetes_model._model_impl.sklearn_model
 
-        logger.info("Diabetes model loaded (sklearn model extracted for predict_proba)")
+        logger.info(f"Diabetes sklearn model type: {type(diabetes_sklearn_model)}")
+        logger.info(f"Diabetes classes_: {diabetes_sklearn_model.classes_}")
+        logger.info("Diabetes model loaded successfully")
 
     except Exception as e:
 
@@ -257,30 +261,19 @@ REQUEST_LATENCY = Histogram(
 )
 
 # -----------------------------
-# FIXED Probability Function
+# Heart Probability Function
 # -----------------------------
-# ROOT CAUSE of the original bug:
-#   mlflow.pyfunc does NOT expose predict_proba, so hasattr() always returned
-#   False. The fallback then called model.predict() which returns integer class
-#   labels (0 or 1). When prediction[0] == 0 (healthy), it returned 0.0 →
-#   "Low Risk" (sometimes correct by luck). When prediction[0] == 1 (sick), it
-#   returned 1.0 → "High Risk" (seemed right but was fragile). For the cases
-#   where the model predicted 0 for a truly sick patient the probability was
-#   0.0 → wrongly "Low Risk". This caused the inversion you observed.
-#
-# FIX:
-#   We extract the underlying sklearn model at load time (heart_sklearn_model /
-#   diabetes_sklearn_model) and call predict_proba on it directly.
-#   predict_proba returns [P(class=0), P(class=1)], so index [1] gives the
-#   probability of the positive class (disease / diabetes).
-#   High probability → High Risk. Low probability → Low Risk. Correct.
+# KEY FINDING: In heart.csv, target labels are:
+#   0 = heart disease PRESENT
+#   1 = no heart disease
+# This is INVERTED from standard convention.
+# Therefore:
+#   proba[0][0] = probability of disease (what we want for risk)
+#   proba[0][1] = probability of no disease (NOT what we want)
+# So we use proba[0][0] as the heart disease risk probability.
 # -----------------------------
 
-def get_probability(sklearn_model, features):
-    """
-    Returns probability of the POSITIVE class (disease present = 1).
-    Uses the unwrapped sklearn model to call predict_proba directly.
-    """
+def get_heart_probability(sklearn_model, features):
 
     try:
 
@@ -288,26 +281,69 @@ def get_probability(sklearn_model, features):
 
             proba = sklearn_model.predict_proba(features)
 
-            # proba shape: (n_samples, n_classes)
-            # classes_ = [0, 1] → index 1 is probability of positive class
-            return float(proba[0][1])
+            # class 0 = disease present → use index 0
+            disease_probability = float(proba[0][0])
 
-        # Fallback if sklearn model not available: use pyfunc predict
-        # predict returns class label; map to a rough probability
-        logger.warning("predict_proba not available; using class label as fallback")
+            logger.info(
+                f"Heart raw proba: {proba} → P(disease)={disease_probability}"
+            )
 
-        return 0.5  # neutral; avoids false High/Low assignments
+            return disease_probability
+
+        logger.warning("Heart predict_proba not available — returning 0.5")
+
+        return 0.5
 
     except Exception as e:
 
-        logger.warning(f"Probability error: {e} — returning 0.5 as neutral fallback")
+        logger.warning(f"Heart probability error: {e} — returning 0.5")
+
+        return 0.5
+
+# -----------------------------
+# Diabetes Probability Function
+# -----------------------------
+# In diabetes.csv, Outcome labels are STANDARD:
+#   0 = no diabetes
+#   1 = diabetic
+# Therefore:
+#   proba[0][1] = probability of diabetes (what we want for risk)
+#   proba[0][0] = probability of no diabetes (NOT what we want)
+# So we use proba[0][1] as the diabetes risk probability.
+# -----------------------------
+
+def get_diabetes_probability(sklearn_model, features):
+
+    try:
+
+        if sklearn_model is not None and hasattr(sklearn_model, "predict_proba"):
+
+            proba = sklearn_model.predict_proba(features)
+
+            # class 1 = diabetic → use index 1
+            disease_probability = float(proba[0][1])
+
+            logger.info(
+                f"Diabetes raw proba: {proba} → P(diabetic)={disease_probability}"
+            )
+
+            return disease_probability
+
+        logger.warning("Diabetes predict_proba not available — returning 0.5")
+
+        return 0.5
+
+    except Exception as e:
+
+        logger.warning(f"Diabetes probability error: {e} — returning 0.5")
 
         return 0.5
 
 # -----------------------------
 # Risk Level Function
-# FIXED thresholds: Low 0–0.3, Medium 0.3–0.7, High 0.7–1.0
-# (original used 0.35 / 0.65 which didn't match the spec)
+# Low    : 0.0 – 0.3
+# Medium : 0.3 – 0.7
+# High   : 0.7 – 1.0
 # -----------------------------
 
 def get_risk_level(probability):
@@ -346,27 +382,27 @@ def predict_heart(data: HeartRequest):
 
     try:
 
-        features = [[
-            data.age,
-            data.sex,
-            data.cp,
-            data.trestbps,
-            data.chol,
-            data.fbs,
-            data.restecg,
-            data.thalach,
-            data.exang,
-            data.oldpeak,
-            data.slope,
-            data.ca,
-            data.thal
-        ]]
+        features = pd.DataFrame([{
+            "age": data.age,
+            "sex": data.sex,
+            "cp": data.cp,
+            "trestbps": data.trestbps,
+            "chol": data.chol,
+            "fbs": data.fbs,
+            "restecg": data.restecg,
+            "thalach": data.thalach,
+            "exang": data.exang,
+            "oldpeak": data.oldpeak,
+            "slope": data.slope,
+            "ca": data.ca,
+            "thal": data.thal
+        }])
 
-        # Use pyfunc model for the class prediction (0 or 1)
+        # pyfunc model for class prediction
         prediction = heart_model.predict(features)[0]
 
-        # Use the unwrapped sklearn model for a correct probability
-        probability = get_probability(
+        # Heart-specific: class 0 = disease → proba[0][0]
+        probability = get_heart_probability(
             heart_sklearn_model,
             features
         )
@@ -421,22 +457,22 @@ def predict_diabetes(data: DiabetesRequest):
 
     try:
 
-        features = [[
-            data.pregnancies,
-            data.glucose,
-            data.blood_pressure,
-            data.skin_thickness,
-            data.insulin,
-            data.bmi,
-            data.diabetes_pedigree_function,
-            data.age
-        ]]
+        features = pd.DataFrame([{
+            "Pregnancies": data.pregnancies,
+            "Glucose": data.glucose,
+            "BloodPressure": data.blood_pressure,
+            "SkinThickness": data.skin_thickness,
+            "Insulin": data.insulin,
+            "BMI": data.bmi,
+            "DiabetesPedigreeFunction": data.diabetes_pedigree_function,
+            "Age": data.age
+        }])
 
-        # Use pyfunc model for the class prediction (0 or 1)
+        # pyfunc model for class prediction
         prediction = diabetes_model.predict(features)[0]
 
-        # Use the unwrapped sklearn model for a correct probability
-        probability = get_probability(
+        # Diabetes-specific: class 1 = diabetic → proba[0][1]
+        probability = get_diabetes_probability(
             diabetes_sklearn_model,
             features
         )
